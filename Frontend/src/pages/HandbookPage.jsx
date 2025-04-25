@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Search, Bell, Calculator, BookOpen, Dumbbell, Apple, Video, Battery, Clock, ChevronRight } from 'lucide-react';
+import { Search, BookOpen, Dumbbell, Apple, Video, Battery, Clock, ChevronRight, X, ExternalLink } from 'lucide-react';
 
 function HandbookPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedGuide, setSelectedGuide] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
+  // Category configuration
   const categories = [
     { id: 'all', name: 'All Guides', icon: <BookOpen className="w-4 h-4" /> },
     { id: 'workouts', name: 'Workouts', icon: <Dumbbell className="w-4 h-4" /> },
@@ -13,6 +16,32 @@ function HandbookPage() {
     { id: 'recovery', name: 'Recovery', icon: <Battery className="w-4 h-4" /> }
   ];
 
+  // Image component to ensure visibility
+  const GuideImage = ({ category, title }) => {
+    // Color based on category
+    const bgColorMap = {
+      'techniques': 'bg-blue-600',
+      'nutrition': 'bg-green-600',
+      'workouts': 'bg-yellow-500',
+      'recovery': 'bg-orange-500'
+    };
+    
+    const bgColor = bgColorMap[category] || 'bg-purple-600';
+    
+    return (
+      <div className={`w-full h-full ${bgColor} flex items-center justify-center p-4`}>
+        <div className="text-center">
+          <div className="text-white font-bold text-xl mb-2">
+            {category.charAt(0).toUpperCase() + category.slice(1)}
+          </div>
+          <div className="text-white text-sm">
+            {title}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const guides = [
     {
       id: 1,
@@ -20,10 +49,17 @@ function HandbookPage() {
       description: 'Master the fundamental technique of squats with this comprehensive guide. Learn proper form, common mistakes to avoid, and progression techniques.',
       category: 'techniques',
       readTime: '15 min',
-      image: 'https://images.pexels.com/photos/703016/pexels-photo-703016.jpeg',
       author: 'Mike Johnson',
       date: '2024-01-15',
-      difficulty: 'Intermediate'
+      difficulty: 'Intermediate',
+      detailedInfo: [
+        'Start with feet slightly wider than shoulder-width apart',
+        'Keep your chest up and back straight throughout the movement',
+        'Lower until thighs are parallel to the ground',
+        'Drive through your heels to return to standing position',
+        'Common mistakes include knees caving inward and rounding the back'
+      ],
+      websiteLink: 'https://www.strongerbyscience.com/how-to-squat/'
     },
     {
       id: 2,
@@ -31,10 +67,17 @@ function HandbookPage() {
       description: 'Learn about the essential nutrients and meal timing for muscle growth. Includes sample meal plans and supplement recommendations.',
       category: 'nutrition',
       readTime: '20 min',
-      image: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
       author: 'Sarah Wilson',
       date: '2024-01-14',
-      difficulty: 'Beginner'
+      difficulty: 'Beginner',
+      detailedInfo: [
+        'Aim for 1.6-2.2g of protein per kg of bodyweight',
+        'Consume 3-5g of carbohydrates per kg for energy and recovery',
+        'Include healthy fats at 0.5-1.5g per kg',
+        'Eat 4-6 smaller meals throughout the day',
+        'Prioritize whole, unprocessed foods for better nutrient absorption'
+      ],
+      websiteLink: 'https://examine.com/guides/protein-intake/'
     },
     {
       id: 3,
@@ -42,10 +85,17 @@ function HandbookPage() {
       description: 'Step-by-step breakdown of conventional and sumo deadlift techniques.',
       category: 'techniques',
       readTime: '30 min',
-      image: 'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg',
       author: 'John Doe',
       date: '2024-01-13',
-      difficulty: 'Advanced'
+      difficulty: 'Advanced',
+      detailedInfo: [
+        'Position the bar over mid-foot before beginning',
+        'Keep your arms straight and outside your knees',
+        'Engage your lats to keep the bar close to your body',
+        'Drive through the floor and extend your hips and knees simultaneously',
+        'Maintain a neutral spine position throughout the lift'
+      ],
+      websiteLink: 'https://www.strongerbyscience.com/how-to-deadlift/'
     },
     {
       id: 4,
@@ -53,10 +103,17 @@ function HandbookPage() {
       description: '4-week high intensity interval training program with modifications.',
       category: 'workouts',
       readTime: '20 min',
-      image: 'https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg',
       author: 'Emily Davis',
       date: '2024-01-12',
-      difficulty: 'Beginner'
+      difficulty: 'Beginner',
+      detailedInfo: [
+        'Start with a 1:2 work-to-rest ratio (e.g., 30 seconds work, 60 seconds rest)',
+        'Gradually progress to 1:1 and then 2:1 ratios as fitness improves',
+        'Include both bodyweight and weighted exercises',
+        'Aim for 20-30 minutes total workout time including warm-up',
+        'Perform 2-3 HIIT sessions per week with recovery days in between'
+      ],
+      websiteLink: 'https://www.acefitness.org/education-and-resources/lifestyle/blog/6752/8-reasons-hiit-workouts-are-so-effective/'
     },
     {
       id: 5,
@@ -64,10 +121,17 @@ function HandbookPage() {
       description: 'Full-body workout using minimal equipment.',
       category: 'workouts',
       readTime: '35 min',
-      image: 'https://images.pexels.com/photos/841131/pexels-photo-841131.jpeg',
       author: 'Chris Brown',
       date: '2024-01-11',
-      difficulty: 'All Levels'
+      difficulty: 'All Levels',
+      detailedInfo: [
+        'Perform 3 full-body workouts per week with at least one rest day between sessions',
+        'Focus on compound movements like squats, presses, rows and lunges',
+        'Use a rep range of 8-12 for muscle growth',
+        'Progressive overload by increasing weight or reps each week',
+        'Include unilateral exercises to address muscle imbalances'
+      ],
+      websiteLink: 'https://www.muscleandstrength.com/workouts/dumbbell-only-home-workout'
     },
     {
       id: 6,
@@ -75,10 +139,17 @@ function HandbookPage() {
       description: '16-week plan for first-time marathon runners.',
       category: 'workouts',
       readTime: '40 min',
-      image: 'https://images.pexels.com/photos/235922/pexels-photo-235922.jpeg',
       author: 'Laura Smith',
       date: '2024-01-10',
-      difficulty: 'Intermediate'
+      difficulty: 'Intermediate',
+      detailedInfo: [
+        'Build base mileage gradually before beginning specific marathon training',
+        'Include one long run per week, increasing distance by 1-2 miles each week',
+        'Incorporate speed work once per week to improve running economy',
+        'Taper training volume 2-3 weeks before race day',
+        'Practice race nutrition strategies during long training runs'
+      ],
+      websiteLink: 'https://www.runnersworld.com/training/a20781512/the-beginners-guide-to-the-half-marathon/'
     },
     {
       id: 7,
@@ -86,461 +157,251 @@ function HandbookPage() {
       description: 'Macro calculations and sample meal plans for bulking.',
       category: 'nutrition',
       readTime: '20 min',
-      image: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
       author: 'Sarah Wilson',
       date: '2024-01-09',
-      difficulty: 'Beginner'
+      difficulty: 'Beginner',
+      detailedInfo: [
+        'Calculate your maintenance calories and add 300-500 calories for muscle gain',
+        'Set protein intake at 1.6-2.2g per kg of bodyweight',
+        'Fill remaining calories with carbohydrates and healthy fats',
+        'Plan meals around your training schedule for optimal nutrient timing',
+        'Track progress and adjust calories every 2-3 weeks based on results'
+      ],
+      websiteLink: 'https://www.healthline.com/nutrition/bulking-diet-meal-plan'
     },
     {
       id: 8,
-      title: 'Intermittent Fasting Guide',
-      description: 'Different fasting protocols and their benefits.',
-      category: 'nutrition',
-      readTime: '15 min',
-      image: 'https://images.pexels.com/photos/1289363/pexels-photo-1289363.jpeg',
-      author: 'Mike Johnson',
+      title: 'Bench Press Form Guide',
+      description: 'Learn how to master the bench press technique for chest development.',
+      category: 'techniques',
+      readTime: '25 min',
+      author: 'Mark Williams',
       date: '2024-01-08',
-      difficulty: 'Intermediate'
+      difficulty: 'Intermediate',
+      detailedInfo: [
+        'Set up with feet flat on the floor and shoulders firmly on the bench',
+        'Grip the bar slightly wider than shoulder-width',
+        'Lower the bar to mid-chest level while keeping elbows at about 45 degrees',
+        'Drive the bar up in a slight arc back toward the rack position',
+        'Maintain scapular retraction throughout the movement for shoulder health'
+      ],
+      websiteLink: 'https://www.strongerbyscience.com/how-to-bench/'
     },
     {
       id: 9,
-      title: 'Vegetarian Muscle Building',
-      description: 'Plant-based protein sources and meal ideas.',
-      category: 'nutrition',
-      readTime: '25 min',
-      image: 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg',
-      author: 'Emily Davis',
+      title: 'Full Body Recovery Protocols',
+      description: 'Evidence-based recovery techniques to maximize performance and minimize soreness.',
+      category: 'recovery',
+      readTime: '30 min',
+      author: 'Jessica Miller',
       date: '2024-01-07',
-      difficulty: 'Intermediate'
+      difficulty: 'All Levels',
+      detailedInfo: [
+        'Prioritize 7-9 hours of quality sleep per night for hormonal recovery',
+        'Implement active recovery sessions between intense workout days',
+        'Use foam rolling and stretching to address tissue quality',
+        'Apply proper hydration strategies before, during, and after workouts',
+        'Consider contrast therapy (alternating hot and cold exposure) for circulation'
+      ],
+      websiteLink: 'https://www.healthline.com/health/fitness-exercise/workout-recovery'
     },
     {
       id: 10,
-      title: 'Supplement Stack Guide',
-      description: 'Evidence-based supplement recommendations.',
+      title: 'Beginner\'s Guide to Meal Prepping',
+      description: 'Learn how to save time and stay consistent with your nutrition through efficient meal preparation.',
       category: 'nutrition',
-      readTime: '18 min',
-      image: 'https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg',
-      author: 'John Doe',
+      readTime: '25 min',
+      author: 'Alex Thompson',
       date: '2024-01-06',
-      difficulty: 'Advanced'
+      difficulty: 'Beginner',
+      detailedInfo: [
+        'Start with a weekly meal plan based on your nutritional goals',
+        'Choose 2-3 protein sources, 3-4 vegetables, and 2-3 carb sources for variety',
+        'Invest in quality food storage containers for different meal components',
+        'Batch cook proteins and grains to save time',
+        'Use different spices and marinades to prevent flavor fatigue'
+      ],
+      websiteLink: 'https://www.healthline.com/nutrition/meal-prep-tips'
     },
     {
       id: 11,
-      title: 'Post-Workout Nutrition',
-      description: 'Optimal recovery meal timing and composition.',
-      category: 'nutrition',
-      readTime: '12 min',
-      image: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
-      author: 'Sarah Wilson',
+      title: 'Proper Pull-Up Progression',
+      description: 'Step-by-step guide to achieving your first pull-up or increasing your pull-up numbers.',
+      category: 'techniques',
+      readTime: '20 min',
+      author: 'David Chen',
       date: '2024-01-05',
-      difficulty: 'Beginner'
+      difficulty: 'All Levels',
+      detailedInfo: [
+        'Start with scapular pulls to develop proper engagement',
+        'Progress to negative pull-ups (jumping up and lowering slowly)',
+        'Incorporate band-assisted pull-ups to build strength through full range of motion',
+        'Use active hangs to build grip strength and shoulder stability',
+        'Implement specific programming with progressive overload for consistent improvement'
+      ],
+      websiteLink: 'https://www.nerdfitness.com/blog/do-a-pull-up/'
     },
     {
       id: 12,
-      title: 'Perfect Push-Up Form',
-      description: 'Progressions from wall pushups to full ROM pushups.',
-      category: 'techniques',
-      readTime: '15 min',
-      image: 'https://images.pexels.com/photos/2261477/pexels-photo-2261477.jpeg',
-      author: 'Chris Brown',
+      title: 'Intermittent Fasting Guide',
+      description: 'Everything you need to know about different intermittent fasting protocols and their benefits.',
+      category: 'nutrition',
+      readTime: '35 min',
+      author: 'Emma Roberts',
       date: '2024-01-04',
-      difficulty: 'Beginner'
+      difficulty: 'Intermediate',
+      detailedInfo: [
+        'Understand the different protocols (16:8, 20:4, 5:2, etc.)',
+        'Learn about metabolic adaptations during fasting periods',
+        'Implement proper hydration and electrolyte strategies',
+        'Structure workouts appropriately around fasting windows',
+        'Monitor biomarkers to assess effectiveness for your specific goals'
+      ],
+      websiteLink: 'https://www.healthline.com/nutrition/intermittent-fasting-guide'
     },
     {
       id: 13,
-      title: 'Olympic Lifting Basics',
-      description: 'Clean & jerk technique breakdown.',
-      category: 'techniques',
-      readTime: '30 min',
-      image: 'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg',
-      author: 'John Doe',
+      title: 'Mobility Routine for Athletes',
+      description: 'Comprehensive mobility program to improve performance and prevent injuries.',
+      category: 'recovery',
+      readTime: '25 min',
+      author: 'Ryan Peters',
       date: '2024-01-03',
-      difficulty: 'Advanced'
+      difficulty: 'All Levels',
+      detailedInfo: [
+        'Begin with a dynamic warm-up to increase blood flow to muscles and joints',
+        'Focus on key problem areas including hips, shoulders, and thoracic spine',
+        'Hold each stretch for 30-60 seconds to achieve optimal tissue adaptation',
+        'Incorporate loaded stretching techniques for enhanced mobility gains',
+        'Implement daily 10-minute minimum mobility routine for maintenance'
+      ],
+      websiteLink: 'https://www.health.harvard.edu/staying-healthy/the-importance-of-stretching'
     },
     {
       id: 14,
-      title: 'Mobility Drills',
-      description: 'Daily routine for improved joint mobility.',
-      category: 'techniques',
-      readTime: '20 min',
-      image: 'https://images.pexels.com/photos/2261477/pexels-photo-2261477.jpeg',
-      author: 'Laura Smith',
+      title: 'Bodyweight Training System',
+      description: 'Build strength and muscle using only your bodyweight with this progressive program.',
+      category: 'workouts',
+      readTime: '30 min',
+      author: 'Jason Rodriguez',
       date: '2024-01-02',
-      difficulty: 'All Levels'
+      difficulty: 'All Levels',
+      detailedInfo: [
+        'Master fundamental movement patterns before progressing to advanced variations',
+        'Use tempo manipulation to increase difficulty without adding weight',
+        'Implement progressive overload through leverage changes and reduced stability',
+        'Train in the 5-12 rep range for strength and hypertrophy adaptations',
+        'Include unilateral work to address imbalances and increase coordination'
+      ],
+      websiteLink: 'https://gmb.io/bodyweight-training/'
     },
     {
       id: 15,
-      title: 'Breathing Techniques',
-      description: 'Diaphragmatic breathing for better performance.',
-      category: 'techniques',
-      readTime: '10 min',
-      image: 'https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg',
-      author: 'Emily Davis',
-      date: '2024-01-01',
-      difficulty: 'Beginner'
+      title: 'Sleep Optimization for Recovery',
+      description: 'Scientific strategies to maximize sleep quality for better recovery and performance.',
+      category: 'recovery',
+      readTime: '35 min',
+      author: 'Dr. Lisa Johnson',
+      date: '2023-12-28',
+      difficulty: 'Beginner',
+      detailedInfo: [
+        'Maintain consistent sleep and wake times to regulate your circadian rhythm',
+        'Optimize your sleep environment with cool temperatures (65-68°F/18-20°C)',
+        'Limit blue light exposure 2-3 hours before bedtime for better melatonin production',
+        'Use strategic pre-sleep nutrition to enhance recovery hormones',
+        'Implement stress-reduction techniques like meditation for deeper sleep'
+      ],
+      websiteLink: 'https://www.sleepfoundation.org/physical-activity/athletic-performance-and-sleep'
     },
     {
       id: 16,
-      title: 'Kettlebell Swing Guide',
-      description: 'Russian vs American swing techniques.',
+      title: 'Kettlebell Fundamentals',
+      description: 'Master the basic kettlebell movements to transform your conditioning and strength.',
       category: 'techniques',
-      readTime: '18 min',
-      image: 'https://images.pexels.com/photos/841131/pexels-photo-841131.jpeg',
-      author: 'Chris Brown',
-      date: '2023-12-31',
-      difficulty: 'Intermediate'
+      readTime: '40 min',
+      author: 'Pavel Ivanov',
+      date: '2023-12-25',
+      difficulty: 'Intermediate',
+      detailedInfo: [
+        'Develop proper hip hinge mechanics before attempting swings',
+        'Master the rack position for efficient cleans and presses',
+        'Engage your lats during swings to protect your lower back',
+        'Use double-breathing technique for Turkish get-ups and heavy presses',
+        'Progress from two-handed to one-handed exercises for increased core engagement'
+      ],
+      websiteLink: 'https://www.strongfirst.com/kettlebell-exercises/'
     },
     {
       id: 17,
-      title: 'Foam Rolling Routine',
-      description: 'Myofascial release techniques for all muscle groups.',
-      category: 'recovery',
-      readTime: '15 min',
-      image: 'https://cdn-ami-drupal.heartyhosting.com/sites/muscleandfitness.com/files/media/foam-rolling-roller-1109_0.jpg',
-      author: 'Laura Smith',
-      date: '2023-12-30',
-      difficulty: 'Beginner'
+      title: 'Anti-Inflammatory Diet Plan',
+      description: 'Reduce inflammation, enhance recovery, and improve long-term health with these nutrition strategies.',
+      category: 'nutrition',
+      readTime: '45 min',
+      author: 'Dr. Michelle Kim',
+      date: '2023-12-22',
+      difficulty: 'Intermediate',
+      detailedInfo: [
+        'Emphasize omega-3 rich foods like fatty fish, flaxseeds and walnuts',
+        'Incorporate colorful fruits and vegetables to increase antioxidant intake',
+        'Minimize processed foods, refined sugars and industrial seed oils',
+        'Include fermented foods for gut health and reduced systemic inflammation',
+        'Use specific spices like turmeric, ginger and cinnamon for their anti-inflammatory properties'
+      ],
+      websiteLink: 'https://www.healthline.com/nutrition/anti-inflammatory-diet-101'
     },
     {
       id: 18,
-      title: 'Sleep Optimization Guide',
-      description: 'Evidence-based sleep hygiene practices.',
+      title: 'Breathing Techniques for Performance',
+      description: 'Optimize your breathing patterns to enhance recovery, reduce stress, and improve athletic output.',
       category: 'recovery',
-      readTime: '20 min',
-      image: 'https://mindbodygreen-res.cloudinary.com/image/upload/c_crop,x_0,y_0,w_1500,h_1000/c_fill,g_auto,w_440,h_296,q_auto,f_auto,fl_lossy/org/1g84vw9aojx1z4ywy.jpg',
-      author: 'Mike Johnson',
-      date: '2023-12-29',
-      difficulty: 'Intermediate'
+      readTime: '30 min',
+      author: 'James Thompson',
+      date: '2023-12-20',
+      difficulty: 'All Levels',
+      detailedInfo: [
+        'Learn diaphragmatic breathing to activate your parasympathetic nervous system',
+        'Practice box breathing (4-4-4-4) for pre-workout focus and post-workout recovery',
+        'Implement 4-7-8 breathing before bed to improve sleep quality',
+        'Use breath holds to improve CO2 tolerance and cardiovascular efficiency',
+        'Sync breathing with movement patterns during exercise for optimal performance'
+      ],
+      websiteLink: 'https://www.health.harvard.edu/staying-healthy/breathing-techniques-for-better-health'
     },
     {
       id: 19,
-      title: 'Active Recovery Workouts',
-      description: 'Low-intensity movement protocols.',
-      category: 'recovery',
-      readTime: '25 min',
-      image: 'https://images.pexels.com/photos/2261477/pexels-photo-2261477.jpeg',
-      author: 'Emily Davis',
-      date: '2023-12-28',
-      difficulty: 'All Levels'
+      title: 'Olympic Weightlifting for Beginners',
+      description: 'Learn the clean and jerk and snatch for explosive power development.',
+      category: 'techniques',
+      readTime: '50 min',
+      author: 'Maria Gonzalez',
+      date: '2023-12-18',
+      difficulty: 'Advanced',
+      detailedInfo: [
+        'Master the front squat and overhead squat before progressing to full lifts',
+        'Develop proper ankle, hip, and shoulder mobility for safe lift execution',
+        'Break down the snatch and clean into component parts using the progression method',
+        'Implement technique-focused sessions with light weights before adding intensity',
+        'Use video analysis to identify and correct form errors'
+      ],
+      websiteLink: 'https://www.catalystathletics.com/article/131/Olympic-Weightlifting-Skill-Learning/'
     },
     {
       id: 20,
-      title: 'Injury Prevention Guide',
-      description: 'Common weightlifting injuries and prevention.',
-      category: 'recovery',
-      readTime: '30 min',
-      image: 'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg',
-      author: 'John Doe',
-      date: '2023-12-27',
-      difficulty: 'Advanced'
-    },
-    {
-      id: 21,
-      title: 'Yoga for Lifters',
-      description: 'Targeted sequences for mobility and recovery.',
-      category: 'recovery',
-      readTime: '20 min',
-      image: 'https://fitnessvolt.com/wp-content/uploads/2024/11/recovery-yoga-for-lifters.jpg',
-      author: 'Sarah Wilson',
-      date: '2023-12-26',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 22,
-      title: 'Advanced Calisthenics Routine',
-      description: 'Master bodyweight exercises like muscle-ups, planches, and handstand push-ups.',
+      title: 'Strength Training for Endurance Athletes',
+      description: 'Optimize your strength training to enhance running, cycling, and swimming performance.',
       category: 'workouts',
-      readTime: '30 min',
-      image: 'https://images.pexels.com/photos/2261477/pexels-photo-2261477.jpeg',
-      author: 'Chris Brown',
-      date: '2024-01-25',
-      difficulty: 'Advanced'
-    },
-    {
-      id: 23,
-      title: 'Keto Diet Explained',
-      description: 'A comprehensive guide to the ketogenic diet, including meal plans and benefits.',
-      category: 'nutrition',
-      readTime: '25 min',
-      image: 'https://images.pexels.com/photos/5949884/pexels-photo-5949884.jpeg',
-      author: 'Sarah Wilson',
-      date: '2024-01-24',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 24,
-      title: 'Pilates for Core Strength',
-      description: 'Improve your core stability and posture with these Pilates exercises.',
-      category: 'techniques',
-      readTime: '20 min',
-      image: 'https://images.pexels.com/photos/903171/pexels-photo-903171.jpeg',
-      author: 'Emily Davis',
-      date: '2024-01-23',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 25,
-      title: 'Cold Therapy Benefits',
-      description: 'Learn how cold showers and ice baths can improve recovery and performance.',
-      category: 'recovery',
-      readTime: '15 min',
-      image: 'https://www.sacksythyme.com/cdn/shop/articles/AdobeStock_159012813_1a338be1-c1ee-48a2-a596-0f92b15748d8.jpg?v=1688642181',
-      author: 'John Doe',
-      date: '2024-01-22',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 26,
-      title: 'Strength Training for Women',
-      description: 'A guide to building strength and confidence in the gym.',
-      category: 'workouts',
-      readTime: '25 min',
-      image: 'https://thorpesphysiotherapy.com/wp-content/uploads/2020/05/foam-roller-back-stretch.jpg',
-      author: 'Laura Smith',
-      date: '2024-01-21',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 27,
-      title: 'Meal Prep for Busy Professionals',
-      description: 'Save time and eat healthy with these meal prep tips and recipes.',
-      category: 'nutrition',
-      readTime: '20 min',
-      image: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
-      author: 'Sarah Wilson',
-      date: '2024-01-20',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 28,
-      title: 'Boxing Basics',
-      description: 'Learn the fundamentals of boxing, including footwork and punching techniques.',
-      category: 'techniques',
-      readTime: '18 min',
-      image: 'https://images.pexels.com/photos/4761353/pexels-photo-4761353.jpeg',
-      author: 'Mike Johnson',
-      date: '2024-01-19',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 29,
-      title: 'Yoga for Stress Relief',
-      description: 'Relax and unwind with these calming yoga sequences.',
-      category: 'recovery',
-      readTime: '15 min',
-      image: 'https://images.pexels.com/photos/1812964/pexels-photo-1812964.jpeg',
-      author: 'Emily Davis',
-      date: '2024-01-18',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 30,
-      title: 'CrossFit Fundamentals',
-      description: 'Get started with CrossFit workouts and learn the basic movements.',
-      category: 'workouts',
-      readTime: '30 min',
-      image: 'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg',
-      author: 'John Doe',
-      date: '2024-01-17',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 31,
-      title: 'Vegan Protein Sources',
-      description: 'Discover plant-based protein options for muscle building.',
-      category: 'nutrition',
-      readTime: '20 min',
-      image: 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg',
-      author: 'Sarah Wilson',
-      date: '2024-01-16',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 32,
-      title: 'Running Form Tips',
-      description: 'Improve your running efficiency and reduce injury risk.',
-      category: 'techniques',
-      readTime: '15 min',
-      image: 'https://images.pexels.com/photos/235922/pexels-photo-235922.jpeg',
-      author: 'Laura Smith',
-      date: '2024-01-15',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 33,
-      title: 'Foam Rolling Techniques',
-      description: 'Relieve muscle tension and improve flexibility with foam rolling.',
-      category: 'recovery',
-      readTime: '12 min',
-      image: 'https://cdn.prod.openfit.com/uploads/2021/02/19143934/openfit-foam-rolling-classes-head-960x480.png',
-      author: 'Emily Davis',
-      date: '2024-01-14',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 34,
-      title: 'Bodyweight Circuit Training',
-      description: 'A full-body workout you can do anywhere, no equipment needed.',
-      category: 'workouts',
-      readTime: '25 min',
-      image: 'https://images.pexels.com/photos/2261477/pexels-photo-2261477.jpeg',
-      author: 'Chris Brown',
-      date: '2024-01-13',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 35,
-      title: 'Healthy Snack Ideas',
-      description: 'Quick and nutritious snacks to fuel your day.',
-      category: 'nutrition',
-      readTime: '10 min',
-      image: 'https://images.pexels.com/photos/793759/pexels-photo-793759.jpeg',
-      author: 'Sarah Wilson',
-      date: '2024-01-12',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 36,
-      title: 'Advanced Stretching Techniques',
-      description: 'Improve flexibility and prevent injuries with these stretches.',
-      category: 'techniques',
-      readTime: '20 min',
-      image: 'https://images.pexels.com/photos/903171/pexels-photo-903171.jpeg',
-      author: 'Emily Davis',
-      date: '2024-01-11',
-      difficulty: 'Advanced'
-    },
-    {
-      id: 37,
-      title: 'Sleep Hygiene Tips',
-      description: 'Optimize your sleep for better recovery and performance.',
-      category: 'recovery',
-      readTime: '15 min',
-      image: 'https://drstevenlazarus.com/wp-content/uploads/2017/08/OROGOLD-Good-Sleep-Hygiene.jpg',
-      author: 'John Doe',
-      date: '2024-01-10',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 38,
-      title: 'Powerlifting 101',
-      description: 'Learn the basics of powerlifting: squat, bench, and deadlift.',
-      category: 'workouts',
-      readTime: '30 min',
-      image: 'https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg',
-      author: 'John Doe',
-      date: '2024-01-09',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 39,
-      title: 'Meal Timing for Athletes',
-      description: 'When and what to eat for optimal performance.',
-      category: 'nutrition',
-      readTime: '20 min',
-      image: 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg',
-      author: 'Sarah Wilson',
-      date: '2024-01-08',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 40,
-      title: 'Advanced Breathing Techniques',
-      description: 'Enhance your performance with advanced breathing methods.',
-      category: 'techniques',
-      readTime: '15 min',
-      image: 'https://stylesatlife.com/wp-content/uploads/2019/05/Yoga-Breathing-Exercises-For-The-Body-Steps-Benefits.jpg',
-      author: 'Emily Davis',
-      date: '2024-01-07',
-      difficulty: 'Advanced'
-    },
-    {
-      id: 41,
-      title: 'Massage Therapy Benefits',
-      description: 'How massage can improve recovery and reduce soreness.',
-      category: 'recovery',
-      readTime: '18 min',
-      image: 'https://backtohealthwoodbury.com/wp-content/uploads/2012/07/massage-photo-for-site.jpg',
-      author: 'John Doe',
-      date: '2024-01-06',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 42,
-      title: 'Functional Fitness Training',
-      description: 'Improve everyday movements with functional exercises.',
-      category: 'workouts',
-      readTime: '25 min',
-      image: 'https://images.pexels.com/photos/2261477/pexels-photo-2261477.jpeg',
-      author: 'Chris Brown',
-      date: '2024-01-05',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 43,
-      title: 'Hydration for Athletes',
-      description: 'Stay hydrated for peak performance and recovery.',
-      category: 'nutrition',
-      readTime: '12 min',
-      image: 'https://maxmuscle.com/cdn/shop/articles/healthy-hydration-for-summer-exercise-957888.jpg?v=1660177241',
-      author: 'Sarah Wilson',
-      date: '2024-01-04',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 44,
-      title: 'Advanced Yoga Poses',
-      description: 'Take your yoga practice to the next level with these challenging poses.',
-      category: 'techniques',
-      readTime: '20 min',
-      image: 'https://i.pinimg.com/originals/ef/9d/44/ef9d4461b2b00612105e38c0124333f2.jpg',
-      author: 'Emily Davis',
-      date: '2024-01-03',
-      difficulty: 'Advanced'
-    },
-    {
-      id: 45,
-      title: 'Active Recovery Techniques',
-      description: 'Low-intensity exercises to speed up recovery.',
-      category: 'recovery',
-      readTime: '15 min',
-      image: 'https://blog.nasm.org/hubfs/active-recovery-days.jpg',
-      author: 'John Doe',
-      date: '2024-01-02',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 46,
-      title: 'Bodybuilding Split Routine',
-      description: 'A 5-day split for muscle hypertrophy and strength.',
-      category: 'workouts',
-      readTime: '30 min',
-      image: 'https://images.pexels.com/photos/1431282/pexels-photo-1431282.jpeg',
-      author: 'John Doe',
-      date: '2024-01-01',
-      difficulty: 'Advanced'
-    },
-    {
-      id: 47,
-      title: 'Pre-Workout Nutrition',
-      description: 'What to eat before your workout for maximum energy.',
-      category: 'nutrition',
-      readTime: '10 min',
-      image: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
-      author: 'Sarah Wilson',
-      date: '2023-12-31',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 48,
-      title: 'Injury Recovery Guide',
-      description: 'Rehab exercises and tips for common fitness injuries.',
-      category: 'recovery',
-      readTime: '25 min',
-      image: 'https://www.sportsmomsurvivalguide.com/wp-content/uploads/2018/04/Injury-Recovery.jpg',
-      author: 'John Doe',
-      date: '2023-12-30',
-      difficulty: 'Intermediate'
+      readTime: '35 min',
+      author: 'Tom Martinez',
+      date: '2023-12-15',
+      difficulty: 'Intermediate',
+      detailedInfo: [
+        'Implement 1-2 strength sessions weekly focusing on multi-joint movements',
+        'Periodize strength work to complement endurance training cycles',
+        'Focus on rate of force development over maximum strength for performance carryover',
+        'Address common weak links including posterior chain, core stability, and single-leg strength',
+        'Program specific injury prevention exercises based on sport demands'
+      ],
+      websiteLink: 'https://www.trainingpeaks.com/blog/strength-training-for-endurance-athletes/'
     }
   ];
 
@@ -551,10 +412,17 @@ function HandbookPage() {
     return matchesSearch && matchesCategory;
   });
 
+  const openGuideDetails = (guide) => {
+    setSelectedGuide(guide);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation Bar */}
-      
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
@@ -569,7 +437,7 @@ function HandbookPage() {
           <input
             type="text"
             placeholder="Search guides..."
-            className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-400"
+            className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -597,11 +465,9 @@ function HandbookPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredGuides.map((guide) => (
             <div key={guide.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <img
-                src={guide.image}
-                alt={guide.title}
-                className="w-full h-48 object-cover"
-              />
+              <div className="h-48">
+                <GuideImage category={guide.category} title={guide.title} />
+              </div>
               <div className="p-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-blue-500 font-medium">
@@ -621,7 +487,10 @@ function HandbookPage() {
                 <p className="text-gray-600 mb-4 line-clamp-2">{guide.description}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">{guide.author}</span>
-                  <button className="flex items-center text-blue-500 hover:text-blue-600">
+                  <button 
+                    onClick={() => openGuideDetails(guide)}
+                    className="flex items-center text-blue-500 hover:text-blue-600"
+                  >
                     Read More
                     <ChevronRight className="w-4 h-4 ml-1" />
                   </button>
@@ -637,6 +506,84 @@ function HandbookPage() {
           </div>
         )}
       </div>
+
+      {/* Modal for Guide Details */}
+      {showModal && selectedGuide && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-screen overflow-auto">
+            {/* Modal Header */}
+            <div className="relative">
+              <div className="h-64">
+                <GuideImage category={selectedGuide.category} title={selectedGuide.title} />
+              </div>
+              <button 
+                onClick={closeModal}
+                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100"
+              >
+                <X className="w-6 h-6 text-gray-700" />
+              </button>
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
+                <span className="inline-block px-3 py-1 bg-blue-500 text-white text-sm font-medium rounded-full mb-2">
+                  {selectedGuide.category.charAt(0).toUpperCase() + selectedGuide.category.slice(1)}
+                </span>
+                <h2 className="text-2xl font-bold text-white">{selectedGuide.title}</h2>
+              </div>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                    {selectedGuide.author.split(' ')[0][0]}{selectedGuide.author.split(' ')[1][0]}
+                  </div>
+                  <div>
+                    <p className="font-medium">{selectedGuide.author}</p>
+                    <p className="text-sm text-gray-500">{selectedGuide.date}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <span className="flex items-center text-gray-500 text-sm">
+                    <Clock className="w-4 h-4 mr-1" />
+                    {selectedGuide.readTime}
+                  </span>
+                  <span className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600">
+                    {selectedGuide.difficulty}
+                  </span>
+                </div>
+              </div>
+              
+              <p className="text-gray-700 mb-8">{selectedGuide.description}</p>
+              
+              <div className="mb-8">
+                <h3 className="text-lg font-bold mb-4">Key Points</h3>
+                <ul className="space-y-3">
+                  {selectedGuide.detailedInfo.map((point, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                        {index + 1}
+                      </span>
+                      <span className="text-gray-700">{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="border-t border-gray-200 pt-6">
+                <a 
+                  href={selectedGuide.websiteLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  <span className="mr-2">Read Full Guide</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

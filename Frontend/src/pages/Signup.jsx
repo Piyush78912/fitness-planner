@@ -11,6 +11,7 @@ const Signup = () => {
     agreeToTerms: false
   });
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,7 +22,7 @@ const Signup = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validate password match
@@ -29,15 +30,100 @@ const Signup = () => {
       setError('Passwords do not match');
       return;
     }
+
+    // Validate terms agreement
+    if (!userData.agreeToTerms) {
+      setError('Please agree to the Terms of Service');
+      return;
+    }
     
     // Clear any existing errors
     setError('');
+    setIsLoading(true);
     
-    // Here you would typically handle user registration with your backend
-    console.log('Signup submitted:', userData);
-    
-    // For demo purposes, navigate to the login page
-    navigate('/login');
+    try {
+      // First check if user already exists
+      const checkUserResponse = await fetch('http://localhost:8000/api/auth/check-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: userData.email
+        })
+      });
+
+      const checkUserData = await checkUserResponse.json();
+
+      if (checkUserData.exists) {
+        setError(
+          <div className="flex flex-col space-y-2">
+            <span>This email is already registered.</span>
+            <div>
+              Please{' '}
+              <Link to="/login" className="text-red-700 font-semibold hover:text-red-800 underline">
+                login here
+              </Link>
+              {' '}instead.
+            </div>
+          </div>
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      // If user doesn't exist, proceed with registration
+      const response = await fetch('http://localhost:8000/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          password: userData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      // If registration is successful
+      console.log('Registration successful:', data);
+      
+      // Store the token if your backend returns one
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+
+      // Show success message and navigate to login
+      alert('Registration successful! Please log in with your credentials.');
+      navigate('/login');
+    } catch (err) {
+      console.error('Registration error:', err);
+      if (err.message.includes('already registered') || err.message.includes('already exists')) {
+        setError(
+          <div className="flex flex-col space-y-2">
+            <span>This email is already registered.</span>
+            <div>
+              Please{' '}
+              <Link to="/login" className="text-red-700 font-semibold hover:text-red-800 underline">
+                login here
+              </Link>
+              {' '}instead.
+            </div>
+          </div>
+        );
+      } else {
+        setError(err.message || 'Failed to register. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -166,9 +252,10 @@ const Signup = () => {
           <div>
             <button
               type="submit"
-              className="w-full px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              disabled={isLoading}
+              className={`w-full px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              Create Account
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
           </div>
 

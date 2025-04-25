@@ -7,6 +7,8 @@ const Login = () => {
     password: '',
     rememberMe: false
   });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -17,13 +19,78 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically handle login authentication with your backend
-    console.log('Login submitted:', credentials);
-    
-    // For demo purposes, navigate to the main dashboard
-    navigate('/workout');
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:8000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        switch (response.status) {
+          case 401:
+            throw new Error('Incorrect password. Please try again.');
+          case 404:
+            throw new Error('user_not_found');
+          default:
+            throw new Error(data.error || 'Login failed. Please try again.');
+        }
+      }
+
+      if (!data.token || !data.user) {
+        throw new Error('Invalid response from server');
+      }
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userData', JSON.stringify(data.user));
+      
+      if (credentials.rememberMe) {
+        localStorage.setItem('email', credentials.email);
+      }
+
+      navigate('/workout');
+    } catch (err) {
+      console.error('Login error:', err);
+      
+      if (err.message === 'user_not_found') {
+        setError(
+          <div className="flex flex-col space-y-2">
+            <span>This email is not registered.</span>
+            <div>
+              Would you like to{' '}
+              <Link to="/signup" className="text-red-700 font-semibold hover:text-red-800 underline">
+                create an account
+              </Link>
+              ?
+            </div>
+          </div>
+        );
+      } else if (err.message.includes('Incorrect password')) {
+        setError(
+          <div className="flex flex-col space-y-2">
+            <span>Incorrect password.</span>
+            <span className="text-sm">Please check your password and try again.</span>
+          </div>
+        );
+      } else {
+        setError(err.message || 'Login failed. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -39,6 +106,12 @@ const Login = () => {
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="p-3 text-sm text-red-600 bg-red-100 rounded-md">
+              {error}
+            </div>
+          )}
+
           <div className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -98,9 +171,10 @@ const Login = () => {
           <div>
             <button
               type="submit"
-              className="w-full px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              disabled={isLoading}
+              className={`w-full px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              Sign in
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
 

@@ -1,159 +1,85 @@
-import React, { useState } from 'react';
-import { Bell, Menu, Calculator } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
-import logo from "../assets/logo.jpg";
+import { Bell, Calculator } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import sample from "../assets/sample.png";
+import BMICalculatorModal from '../components/BMICalculatorModal';
+import NavigationLinks from '../components/NavigationLinks';
+import ProfileDropdown from '../components/ProfileDropdown';
 
 function Header() {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isBMIModalOpen, setIsBMIModalOpen] = useState(false);
-  const [height, setHeight] = useState('');
-  const [heightUnit, setHeightUnit] = useState('cm');
-  const [weight, setWeight] = useState('');
-  const [bmi, setBMI] = useState(null);
-  const location = useLocation();
-  const navigate = useNavigate(); // Initialize navigate
+  const [userData, setUserData] = useState(null);
+  const [profileImage, setProfileImage] = useState(sample);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token"); // Clear token (or session data)
-    navigate("/login"); // Redirect to login page
-  };
+  useEffect(() => {
+    // Get user data from localStorage
+    const storedUserData = localStorage.getItem('userData');
+    if (storedUserData) {
+      try {
+        const parsedData = JSON.parse(storedUserData);
+        setUserData(parsedData);
+        if (parsedData.profileImage) {
+          setProfileImage(parsedData.profileImage);
+        }
+      } catch (err) {
+        console.error('Error parsing user data from localStorage:', err);
+      }
+    }
+  }, []);
 
   return (
-    <>
-      <nav className="bg-red-500/90 sticky top-0 w-full z-50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <img className="h-14 w-14 object-contain p-1" src={logo} alt="Fitness Logo" />
-            </div>
-
-            <div className="hidden sm:flex flex-1 justify-center">
-              <div className="flex space-x-4">
-                {['Workout', 'Feed', 'Messages', 'HandBook'].map((link) => (
-                  <a
-                    key={link}
-                    href={`/${link.toLowerCase()}`}
-                    className={`rounded-md px-3 py-2 text-sm font-medium no-underline transition-colors ${
-                      location.pathname === `/${link.toLowerCase()}` ? 'bg-gray-900 text-white' : 'hover:bg-gray-700 text-white'
-                    }`}
-                  >
-                    {link}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setIsBMIModalOpen(true)}
-                className="flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-gray-700"
-              >
-                <Calculator className="h-5 w-5" />
-                <span className="hidden md:inline">BMI Calculator</span>
-              </button>
-
-              <button type="button" className="relative rounded-full bg-gray-800 p-2 text-white hover:bg-gray-700 focus:ring-2 focus:ring-white">
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center rounded-full bg-red-600 text-xs text-white">
-                  1
-                </span>
-              </button>
-
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="relative flex rounded-full bg-gray-800 p-1 focus:ring-2 focus:ring-white"
+    <nav className="bg-red-500/90 sticky top-0 w-full z-50">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Simple Heart with Pulse Icon */}
+          <div className="flex items-center">
+            <div className="flex items-center space-x-2">
+              <div className="bg-white rounded-full p-2 shadow-sm">
+                <svg 
+                  width="28" 
+                  height="28"
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <img className="h-8 w-8 rounded-full object-cover" src={sample} alt="Profile" />
-                </button>
-                
-                {isDropdownOpen && (
-                  <div className="absolute right-0 z-10 mt-2 w-48 bg-white rounded-md shadow-lg">
-                    <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
-                    <a href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
-                    <a 
-                      onClick={handleLogout} 
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Sign out
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {isBMIModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96 max-w-[90%]">
-            <h2 className="text-xl font-bold mb-4">BMI Calculator</h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Height</label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="number"
-                    value={height}
-                    onChange={(e) => setHeight(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md"
-                    placeholder={`Enter height in ${heightUnit}`}
+                  {/* Simple Heart Icon */}
+                  <path 
+                    d="M12 6C12 6 9 3 5.5 3C2 3 2 6.5 2 6.5C2 9.5 3.5 11.5 5.5 13.5C7.5 15.5 12 19 12 19C12 19 16.5 15.5 18.5 13.5C20.5 11.5 22 9.5 22 6.5C22 6.5 22 3 18.5 3C15 3 12 6 12 6Z" 
+                    fill="#ef4444" 
+                    stroke="#ef4444" 
+                    strokeWidth="1.5"
                   />
-                  <select
-                    value={heightUnit}
-                    onChange={(e) => setHeightUnit(e.target.value)}
-                    className="px-2 py-2 border rounded-md"
-                  >
-                    <option value="cm">cm</option>
-                    <option value="feet">feet</option>
-                  </select>
-                </div>
+                </svg>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
-                <input
-                  type="number"
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md"
-                  placeholder="Enter weight in kg"
-                />
-              </div>
-
-              <button
-                onClick={() => {
-                  const heightInMeters = heightUnit === 'feet' ? parseFloat(height) * 0.3048 : parseFloat(height) / 100;
-                  if (heightInMeters && weight) {
-                    setBMI((parseFloat(weight) / (heightInMeters ** 2)).toFixed(1));
-                  }
-                }}
-                className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600"
-              >
-                Calculate BMI
-              </button>
-
-              {bmi && (
-                <div className="mt-4">
-                  <p className="text-lg">Your BMI: <span className="font-bold">{bmi}</span></p>
-                  <p className={`text-lg ${bmi < 18.5 ? 'text-blue-500' : bmi < 24.9 ? 'text-green-500' : bmi < 29.9 ? 'text-yellow-500' : 'text-red-500'}`}>
-                    Category: {bmi < 18.5 ? 'Underweight' : bmi < 24.9 ? 'Normal weight' : bmi < 29.9 ? 'Overweight' : 'Obese'}
-                  </p>
-                </div>
-              )}
-
-              <button onClick={() => setIsBMIModalOpen(false)} className="w-full mt-4 bg-gray-200 text-gray-800 py-2 rounded-md hover:bg-gray-300">
-                Close
-              </button>
+              <span className="text-white font-bold text-xl">FitPlanner</span>
             </div>
           </div>
+
+          {/* Navigation Links */}
+          <NavigationLinks />
+
+          {/* Right Side Icons */}
+          <div className="flex items-center space-x-4">
+            {/* BMI Calculator Button */}
+            <button
+              onClick={() => setIsBMIModalOpen(true)}
+              className="flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium text-white hover:bg-gray-700"
+            >
+              <Calculator className="h-5 w-5" />
+              <span className="hidden md:inline">BMI Calculator</span>
+            </button>
+
+            {/* Profile Dropdown */}
+            <ProfileDropdown profileImage={profileImage} />
+          </div>
         </div>
-      )}
-    </>
+      </div>
+
+      {/* BMI Calculator Modal */}
+      <BMICalculatorModal 
+        isOpen={isBMIModalOpen} 
+        onClose={() => setIsBMIModalOpen(false)} 
+      />
+    </nav>
   );
 }
 
