@@ -56,9 +56,9 @@ const WorkoutPage = () => {
       duration: '30 min',
       level: 'Beginner',
       recommendedAgeRanges: [{ min: 16, max: 80 }], // Suitable for most age groups
-      image: 'https://images.pexels.com/photos/1812964/pexels-photo-1812964.jpeg',
+      image: '/images/basicYogaFlow.jpg',
       description: 'A gentle introduction to basic yoga poses and breathing techniques. Perfect for beginners.',
-      youtubeUrl: 'https://www.youtube.com/embed/v7AYKMP6rOE',
+      videoUrl: '/videos/basicyogaflow.mp4',
       detailedInstructions: [
         'Start in a comfortable seated position',
         'Begin with deep breathing exercises',
@@ -75,9 +75,9 @@ const WorkoutPage = () => {
       duration: '45 min',
       level: 'Intermediate',
       recommendedAgeRanges: [{ min: 18, max: 55 }], // More suitable for younger to middle-aged adults
-      image: 'https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg',
+      image: '/images/vinyasaflow.jpg',
       description: 'Synchronize movement with breath in this flowing sequence of yoga poses.',
-      youtubeUrl: 'https://www.youtube.com/embed/9kOCY0KNByw',
+      videoUrl: '/videos/yogaforstrength.mp4',
       detailedInstructions: [
         'Begin in mountain pose with intentional breathing',
         'Flow through sun salutations A and B',
@@ -86,17 +86,17 @@ const WorkoutPage = () => {
         'End with seated forward folds and final relaxation'
       ],
       benefits: 'Builds cardiovascular endurance, improves strength and flexibility, enhances breath control and mental focus.'
-    },
-    {
+        },
+        {
       id: 3,
       title: 'Power Yoga',
       category: 'Yoga',
       duration: '60 min',
       level: 'Advanced',
       recommendedAgeRanges: [{ min: 20, max: 45 }], // More intense, better for younger adults
-      image: 'https://images.pexels.com/photos/2261477/pexels-photo-2261477.jpeg',
+      image: '/images/poweryoga.jpg',
       description: 'Build strength and endurance in this challenging yoga sequence.',
-      youtubeUrl: 'https://www.youtube.com/embed/6rh6pVGTqRU',
+      videoUrl: '/videos/poweryogabreak.mp4',
       detailedInstructions: [
         'Begin with energizing breathing techniques',
         'Practice advanced sun salutations with jump-throughs',
@@ -113,9 +113,9 @@ const WorkoutPage = () => {
       duration: '50 min',
       level: 'Beginner',
       recommendedAgeRanges: [{ min: 16, max: 85 }], // Great for all ages including seniors
-      image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80',
+      image: '/images/hathayoga.jpg',
       description: 'Focus on foundational poses and proper alignment in this traditional yoga practice.',
-      youtubeUrl: 'https://www.youtube.com/embed/LI9upn4t9n8',
+      videoUrl: '/videos/hathayoga.mp4',
       detailedInstructions: [
         'Begin with centering and breathing awareness',
         'Practice gentle warm-ups for the spine and joints',
@@ -132,9 +132,9 @@ const WorkoutPage = () => {
       duration: '60 min',
       level: 'All Levels',
       recommendedAgeRanges: [{ min: 30, max: 90 }], // Great for middle-aged and older adults
-      image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80',
+      image: '/images/yinyoga.jpg',
       description: 'Deep stretching practice targeting connective tissues and joints with long-held passive poses.',
-      youtubeUrl: 'https://www.youtube.com/embed/P0UsdewWXLA',
+      videoUrl: '/videos/yinyoga.mp4',
       detailedInstructions: [
         'Begin with mindful breathing and setting intentions',
         'Move into passive poses held for 3-5 minutes each',
@@ -152,9 +152,9 @@ const WorkoutPage = () => {
       duration: '20 min',
       level: 'Beginner',
       recommendedAgeRanges: [{ min: 10, max: 100 }], // Beneficial for all ages
-      image: 'https://images.unsplash.com/photo-1593811167562-9cef47bfc4d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80',
+      image: '/images/mindfulnessMeditation.jpg',
       description: 'Learn to be present and cultivate awareness through guided mindfulness meditation.',
-      youtubeUrl: 'https://www.youtube.com/embed/U9YKY7fdwyg',
+      videoUrl: '/videos/mindfulnessMeditation.mp4',
       detailedInstructions: [
         'Find a comfortable seated position',
         'Focus on your natural breath without changing it',
@@ -171,9 +171,9 @@ const WorkoutPage = () => {
       duration: '15 min',
       level: 'All Levels',
       recommendedAgeRanges: [{ min: 12, max: 100 }], // Great for all ages
-      image: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80',
+      image: '/images/lovingkindness.jpg',
       description: 'Cultivate compassion and goodwill toward yourself and others through this heart-centered practice.',
-      youtubeUrl: 'https://www.youtube.com/embed/sz7cpV7ERsM',
+      videoUrl: '/videos/lovingkindnessMeditation.mp4',
       detailedInstructions: [
         'Sit comfortably with eyes closed',
         'Begin by directing loving phrases toward yourself',
@@ -190,9 +190,9 @@ const WorkoutPage = () => {
       duration: '25 min',
       level: 'Beginner',
       recommendedAgeRanges: [{ min: 16, max: 90 }], // Good for most age groups
-      image: 'https://images.unsplash.com/photo-1497561813398-8fcc7a37b567?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80',
+      image: '/images/bodyscanmeditation.jpg',
       description: 'Develop body awareness and release tension through this guided progressive relaxation practice.',
-      youtubeUrl: 'https://www.youtube.com/embed/OS_iqfGjL78',
+      videoUrl: '/videos/bodyscanmeditation.mp4',
       detailedInstructions: [
         'Lie down in a comfortable position',
         'Bring awareness to your breath',
@@ -210,9 +210,9 @@ const WorkoutPage = () => {
       duration: '10 min',
       level: 'All Levels',
       recommendedAgeRanges: [{ min: 14, max: 85 }], // Suitable for most age groups
-      image: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80',
+      image: '/images/nostrilBreathing.jpg',
       description: 'Balance energy channels and calm the mind with this traditional breathing technique.',
-      youtubeUrl: 'https://www.youtube.com/embed/8VwufJrUhic',
+      videoUrl: '/videos/nostrilBreathing.mp4',
       detailedInstructions: [
         'Sit in a comfortable meditation posture',
         'Use right thumb to close right nostril',
@@ -229,9 +229,9 @@ const WorkoutPage = () => {
       duration: '15 min',
       level: 'Intermediate',
       recommendedAgeRanges: [{ min: 16, max: 75 }], // Better for adults
-      image: 'https://images.pexels.com/photos/3759659/pexels-photo-3759659.jpeg',
+      image: '/images/ujjaiBreathing.jpg',
       description: 'The "Victorious Breath" - learn this powerful technique used during yoga practice.',
-      youtubeUrl: 'https://www.youtube.com/embed/lnXOHtdeodU',
+      videoUrl: '/videos/UjjaiBreathing.mp4',
       detailedInstructions: [
         'Sit tall with a straight spine',
         'Inhale deeply through the nose',
@@ -248,9 +248,9 @@ const WorkoutPage = () => {
       duration: '10 min',
       level: 'Advanced',
       recommendedAgeRanges: [{ min: 18, max: 55 }], // More intense, better for younger to middle-aged adults
-      image: 'https://images.unsplash.com/photo-1552196563-55cd4e45efb3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80',
+      image: '/images/breathoffire.jpg',
       description: 'Energizing breathing technique to stimulate the solar plexus and increase vitality.',
-      youtubeUrl: 'https://www.youtube.com/embed/Utb8Et5cnuM',
+      videoUrl: '/videos/BreathOfFire.mp4',
       detailedInstructions: [
         'Sit in an upright position',
         'Begin with deep breaths to prepare',
@@ -268,9 +268,9 @@ const WorkoutPage = () => {
       duration: '20 min',
       level: 'All Levels',
       recommendedAgeRanges: [{ min: 16, max: 70 }], // Good for most adults
-      image: 'https://images.pexels.com/photos/2294363/pexels-photo-2294363.jpeg',
+      image: '/images/sunsalutation.jpg',
       description: 'Traditional sequence of poses performed as a flowing practice to honor the sun.',
-      youtubeUrl: 'https://www.youtube.com/embed/8AakYeM23sI',
+      videoUrl: '/videos/sunSalutation.mp4',
       detailedInstructions: [
         'Begin in Mountain Pose (Tadasana)',
         'Flow through the classic 12-position sequence',
@@ -287,9 +287,9 @@ const WorkoutPage = () => {
       duration: '30 min',
       level: 'Intermediate',
       recommendedAgeRanges: [{ min: 18, max: 65 }], // Better for younger to middle-aged adults
-      image: 'https://images.unsplash.com/photo-1545389336-cf090694435e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80',
+      image: '/images/standingpose.jpg',
       description: 'Build strength and stability through a series of powerful standing poses.',
-      youtubeUrl: 'https://www.youtube.com/embed/2ghl626p4P8',
+      videoUrl: '/videos/standingYoga.mp4',
       detailedInstructions: [
         'Begin with grounding and centering',
         'Practice various warrior poses and their variations',
@@ -306,9 +306,9 @@ const WorkoutPage = () => {
       duration: '45 min',
       level: 'Beginner',
       recommendedAgeRanges: [{ min: 30, max: 100 }], // Great for middle-aged and older adults
-      image: 'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80',
+      image: '/images/restorativeyoga.jpg',
       description: 'Deeply relaxing practice using props to support the body in gentle poses.',
-      youtubeUrl: 'https://www.youtube.com/embed/VU6u-Fjtbd4',
+      videoUrl: '/videos/RestorativeYoga.mp4',
       detailedInstructions: [
         'Gather props like blankets, blocks, and bolsters',
         'Set up each pose with careful attention to comfort',
@@ -325,9 +325,9 @@ const WorkoutPage = () => {
       duration: '25 min',
       level: 'Intermediate',
       recommendedAgeRanges: [{ min: 18, max: 60 }], // Better for adults with good core strength
-      image: 'https://images.pexels.com/photos/6455815/pexels-photo-6455815.jpeg',
+      image: '/images/corestrength.jpg',
       description: 'Build core strength and stability through targeted yoga poses and movements.',
-      youtubeUrl: 'https://www.youtube.com/embed/7ciS93shMNQ',
+      videoUrl: '/videos/coreStrengthning.mp4',
       detailedInstructions: [
         'Begin with gentle warm-up movements',
         'Progress through plank variations',
@@ -345,9 +345,9 @@ const WorkoutPage = () => {
       duration: '30 min',
       level: 'Beginner',
       recommendedAgeRanges: [{ min: 60, max: 100 }], // Specially designed for seniors
-      image: 'https://images.unsplash.com/photo-1616699002805-0741e1e4a9c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80',
+      image: '/images/gentleYoga.jpg',
       description: 'Gentle movements and poses designed specifically for older adults to improve mobility and balance.',
-      youtubeUrl: 'https://www.youtube.com/embed/kFhG-ZzLNN4',
+      videoUrl: '/videos/yogaForSeniors.mp4',
       detailedInstructions: [
         'Begin with seated warm-ups',
         'Practice gentle standing poses with chair support',
@@ -364,9 +364,9 @@ const WorkoutPage = () => {
       duration: '15 min',
       level: 'Beginner',
       recommendedAgeRanges: [{ min: 10, max: 18 }], // Specifically for youth
-      image: 'https://plus.unsplash.com/premium_photo-1661772097548-021fbb1ebfb0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      image: '/images/youthmeditation.jpg',
       description: 'Kid-friendly meditation techniques to help young people manage stress and build focus.',
-      youtubeUrl: 'https://www.youtube.com/embed/ZME0JKiweL4',
+      videoUrl: '/videos/youthMeditation.mp4',
       detailedInstructions: [
         'Find a comfortable position',
         'Use age-appropriate visualization techniques',
@@ -675,7 +675,7 @@ const WorkoutPage = () => {
                 <div className="aspect-w-16 aspect-h-9">
                   <iframe 
                     className="w-full h-64"
-                    src={selectedWorkout.youtubeUrl} 
+                    src={selectedWorkout.videoUrl} 
                     title={`${selectedWorkout.title} Video`}
                     frameBorder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
