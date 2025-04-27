@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import logo from '../assets/logo.jpg';
 const Login = () => {
   const [credentials, setCredentials] = useState({
     email: '',
@@ -99,7 +99,7 @@ const Login = () => {
         <div className="text-center">
           <img 
             className="mx-auto w-24 h-24" 
-            src="/logo.png" 
+            src= {logo} 
             alt="Fitness Planner Logo" 
           />
           <h2 className="mt-6 text-3xl font-bold text-gray-900">Login to Fitness Planner</h2>

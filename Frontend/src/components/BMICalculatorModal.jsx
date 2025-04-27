@@ -6,6 +6,8 @@ const BMICalculatorModal = ({ isOpen, onClose }) => {
   const [weight, setWeight] = useState('');
   const [bmi, setBMI] = useState(null);
   const [bmiMessage, setBMIMessage] = useState('');
+  const [heightError, setHeightError] = useState('');
+  const [weightError, setWeightError] = useState('');
   
   const modalRef = useRef(null);
 
@@ -26,7 +28,53 @@ const BMICalculatorModal = ({ isOpen, onClose }) => {
     };
   }, [isOpen]);
 
+  // Validate height input
+  const validateHeight = (value) => {
+    if (parseFloat(value) < 0) {
+      setHeightError('Height must be a positive value');
+      return false;
+    }
+    setHeightError('');
+    return true;
+  };
+
+  // Validate weight input
+  const validateWeight = (value) => {
+    if (parseFloat(value) < 0) {
+      setWeightError('Weight must be a positive value');
+      return false;
+    }
+    setWeightError('');
+    return true;
+  };
+
+  // Update height with validation
+  const handleHeightChange = (e) => {
+    const value = e.target.value;
+    setHeight(value);
+    if (value) validateHeight(value);
+  };
+
+  // Update weight with validation
+  const handleWeightChange = (e) => {
+    const value = e.target.value;
+    setWeight(value);
+    if (value) validateWeight(value);
+  };
+
   const handleCalculate = async () => {
+    // Reset error messages
+    setHeightError('');
+    setWeightError('');
+
+    // Validate inputs before calculation
+    const heightIsValid = validateHeight(height);
+    const weightIsValid = validateWeight(weight);
+
+    if (!heightIsValid || !weightIsValid) {
+      return;
+    }
+
     let heightInMeters;
     if (heightUnit === 'cm') {
       heightInMeters = parseFloat(height) / 100;
@@ -79,6 +127,10 @@ const BMICalculatorModal = ({ isOpen, onClose }) => {
   const handleClose = () => {
     setBMI(null);
     setBMIMessage('');
+    setHeightError('');
+    setWeightError('');
+    setHeight('');
+    setWeight('');
     onClose();
   };
 
@@ -124,14 +176,21 @@ const BMICalculatorModal = ({ isOpen, onClose }) => {
             Height
           </label>
           <div className="flex space-x-2">
-            <input
-              type="number"
-              id="height"
-              value={height}
-              onChange={(e) => setHeight(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 p-2 border"
-              placeholder="Enter height"
-            />
+            <div className="w-full">
+              <input
+                type="number"
+                id="height"
+                value={height}
+                onChange={handleHeightChange}
+                className={`block w-full rounded-md shadow-sm focus:border-red-500 focus:ring-red-500 p-2 border ${
+                  heightError ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="Enter height"
+              />
+              {heightError && (
+                <p className="mt-1 text-sm text-red-600">{heightError}</p>
+              )}
+            </div>
             <select
               value={heightUnit}
               onChange={(e) => setHeightUnit(e.target.value)}
@@ -151,16 +210,21 @@ const BMICalculatorModal = ({ isOpen, onClose }) => {
             type="number"
             id="weight"
             value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 p-2 border"
+            onChange={handleWeightChange}
+            className={`block w-full rounded-md shadow-sm focus:border-red-500 focus:ring-red-500 p-2 border ${
+              weightError ? 'border-red-500' : 'border-gray-300'
+            }`}
             placeholder="Enter weight"
           />
+          {weightError && (
+            <p className="mt-1 text-sm text-red-600">{weightError}</p>
+          )}
         </div>
 
         <button
           onClick={handleCalculate}
           className="w-full bg-red-500 text-white rounded-md py-2 px-4 hover:bg-red-600 transition"
-          disabled={!height || !weight}
+          disabled={!height || !weight || heightError || weightError}
         >
           Calculate BMI
         </button>
