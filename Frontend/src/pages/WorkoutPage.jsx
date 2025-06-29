@@ -1,18 +1,97 @@
 import { Activity, Award, BookmarkPlus, Calendar, Clock, Play, Share2, X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+import { toast } from 'react-toastify';
 
 const WorkoutPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedWorkout, setSelectedWorkout] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showVideoView, setShowVideoView] = useState(false);
-  // Add user age state (default value can be changed as needed)
-  const [userAge, setUserAge] = useState(30);
-  const [showAgeModal, setShowAgeModal] = useState(false);
+  const [userAge, setUserAge] = useState(null);
+  const [savedWorkouts, setSavedWorkouts] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingAge, setIsLoadingAge] = useState(true);
   
   // Create ref for modal content
   const modalRef = useRef(null);
-  const ageModalRef = useRef(null);
+
+  // Function to update age from localStorage or fetch from API if needed
+  const updateUserAge = async () => {
+    setIsLoadingAge(true);
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      const parsedData = JSON.parse(userData);
+      if (parsedData.age) {
+        setUserAge(parsedData.age);
+        setIsLoadingAge(false);
+        return;
+      }
+    }
+    // If no data in localStorage, fetch from API
+    await fetchUserProfile();
+    setIsLoadingAge(false);
+  };
+
+  // Fetch user profile data
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setIsLoadingAge(false);
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch('http://localhost:8000/api/users/profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        setIsLoadingAge(false);
+        throw new Error(`Failed to fetch profile: ${response.status}`);
+      }
+
+      const { success, data } = await response.json();
+      if (data && data.age) {
+        setUserAge(data.age);
+        // Update localStorage with new data
+        localStorage.setItem('userData', JSON.stringify(data));
+      }
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+      toast.error('Failed to fetch user profile');
+    } finally {
+      setIsLoadingAge(false);
+    }
+  };
+
+  // Update age when component mounts and when localStorage changes
+  useEffect(() => {
+    updateUserAge();
+
+    // Listen for localStorage changes
+    const handleStorageChange = (e) => {
+      if (e.key === 'userData') {
+        updateUserAge();
+      }
+    };
+
+    // Set up periodic check every 30 seconds
+    const intervalId = setInterval(() => {
+      updateUserAge();
+    }, 30000);
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Cleanup listener and interval
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(intervalId);
+    };
+  }, []);
 
   // Handle click outside of modal
   useEffect(() => {
@@ -20,13 +99,10 @@ const WorkoutPage = () => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
         closeModal();
       }
-      if (ageModalRef.current && !ageModalRef.current.contains(event.target) && showAgeModal) {
-        setShowAgeModal(false);
-      }
     };
 
     // Add event listener when modal is shown
-    if (showModal || showAgeModal) {
+    if (showModal) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     
@@ -34,7 +110,98 @@ const WorkoutPage = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showModal, showAgeModal]);
+  }, [showModal]);
+
+  // Fetch saved workouts on component mount
+  useEffect(() => {
+    fetchSavedWorkouts();
+  }, []);
+
+  // Function to fetch saved workouts
+  const fetchSavedWorkouts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+
+      const response = await fetch('http://localhost:8000/api/saved-workouts', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch saved workouts');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setSavedWorkouts(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching saved workouts:', error);
+      toast.error(error.message || 'Failed to fetch saved workouts');
+    }
+  };
+
+  // Function to save workout
+  const handleSaveWorkout = async (workout) => {
+    if (isSaving) return;
+    
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Please log in to save workouts');
+        return;
+      }
+
+      const response = await fetch('http://localhost:8000/api/saved-workouts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          workoutId: workout.id,
+          title: workout.title,
+          category: workout.category,
+          duration: workout.duration,
+          level: workout.level,
+          image: workout.image,
+          description: workout.description
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save workout');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success('Workout saved successfully!');
+        fetchSavedWorkouts(); // Refresh saved workouts list
+      } else {
+        throw new Error(data.message || 'Failed to save workout');
+      }
+    } catch (error) {
+      console.error('Error saving workout:', error);
+      toast.error(error.message || 'Failed to save workout');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Function to check if workout is saved
+  const isWorkoutSaved = (workoutId) => {
+    return savedWorkouts.some(saved => saved.workoutId === workoutId);
+  };
 
   const stats = [
     { title: 'Weekly Sessions', value: '8', icon: <Activity className="w-6 h-6 text-blue-500" /> },
@@ -44,7 +211,7 @@ const WorkoutPage = () => {
   ];
 
   const categories = [
-    'All', 'Recommended for You', 'Yoga', 'Meditation', 'Pranayama', 'Asanas'
+    'All', 'Recommended for You', 'Saved Workouts', 'Yoga', 'Meditation', 'Pranayama', 'Asanas'
   ];
 
   const workouts = [
@@ -388,8 +555,25 @@ const WorkoutPage = () => {
     });
   };
 
+  // Function to handle starting a workout (either regular or saved)
   const handleStartWorkout = (workout) => {
-    setSelectedWorkout(workout);
+    // Find the full workout details if it's a saved workout
+    if (workout._id) { // If it has _id, it's a saved workout
+      const originalWorkout = workouts.find(w => w.id === workout.workoutId);
+      if (originalWorkout) {
+        setSelectedWorkout({
+          ...workout,
+          videoUrl: originalWorkout.videoUrl,
+          detailedInstructions: originalWorkout.detailedInstructions,
+          benefits: originalWorkout.benefits,
+          recommendedAgeRanges: originalWorkout.recommendedAgeRanges
+        });
+      } else {
+        setSelectedWorkout(workout);
+      }
+    } else {
+      setSelectedWorkout(workout);
+    }
     setShowModal(true);
   };
 
@@ -408,32 +592,57 @@ const WorkoutPage = () => {
     setShowVideoView(false);
   };
 
-  // Function to open the age input modal
-  const openAgeModal = () => {
-    setShowAgeModal(true);
-  };
-
-  // Function to handle age input and update recommendations
-  const handleAgeSubmit = (e) => {
-    e.preventDefault();
-    const newAge = parseInt(e.target.age.value);
-    if (newAge && newAge > 0 && newAge < 120) {
-      setUserAge(newAge);
-      setShowAgeModal(false);
-      
-      // If currently viewing recommended workouts, refresh the view
-      if (selectedCategory === 'Recommended for You') {
-        setSelectedCategory('Recommended for You');
-      }
+  // Function to get filtered workouts
+  const getFilteredWorkouts = () => {
+    if (selectedCategory === 'Saved Workouts') {
+      return savedWorkouts.map(saved => {
+        // Find the original workout to get additional details
+        const originalWorkout = workouts.find(w => w.id === saved.workoutId);
+        return {
+          ...saved,
+          videoUrl: originalWorkout?.videoUrl,
+          detailedInstructions: originalWorkout?.detailedInstructions,
+          benefits: originalWorkout?.benefits,
+          recommendedAgeRanges: originalWorkout?.recommendedAgeRanges
+        };
+      });
     }
+    
+    if (selectedCategory === 'Recommended for You') {
+      return getRecommendedWorkouts();
+    }
+    
+    return selectedCategory === 'All' 
+      ? workouts 
+      : workouts.filter(workout => workout.category === selectedCategory);
   };
 
-  // Get filtered workouts based on selected category
-  const filteredWorkouts = selectedCategory === 'Recommended for You' 
-    ? getRecommendedWorkouts() 
-    : workouts.filter(workout => 
-        selectedCategory === 'All' || workout.category === selectedCategory
+  // Update the age section JSX
+  const renderAgeSection = () => {
+    if (isLoadingAge) {
+      return (
+        <div className="bg-white rounded-lg p-6 shadow-md mb-8">
+          <div className="flex items-center">
+            <div>
+              <p className="text-gray-600 text-sm mb-1">Your Age</p>
+              <h3 className="text-2xl font-bold text-gray-400">Loading...</h3>
+            </div>
+          </div>
+        </div>
       );
+    }
+
+    return (
+      <div className="bg-white rounded-lg p-6 shadow-md mb-8">
+        <div className="flex items-center">
+          <div>
+            <p className="text-gray-600 text-sm mb-1">Your Age</p>
+            <h3 className="text-2xl font-bold">{userAge ? `${userAge} years` : 'Age not set'}</h3>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -455,20 +664,7 @@ const WorkoutPage = () => {
         </div>
 
         {/* Age section */}
-        <div className="bg-white rounded-lg p-6 shadow-md mb-8">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-gray-600 text-sm mb-1">Your Age</p>
-              <h3 className="text-2xl font-bold">{userAge} years</h3>
-            </div>
-            <button 
-              onClick={openAgeModal}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Update Age
-            </button>
-          </div>
-        </div>
+        {renderAgeSection()}
 
         {/* Category Filters */}
         <div className="flex space-x-4 mb-8 overflow-x-auto pb-2">
@@ -489,9 +685,9 @@ const WorkoutPage = () => {
 
         {/* Workouts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredWorkouts.length > 0 ? (
-            filteredWorkouts.map((workout) => (
-              <div key={workout.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+          {getFilteredWorkouts().length > 0 ? (
+            getFilteredWorkouts().map((workout) => (
+              <div key={workout.id || workout._id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                 <img
                   src={workout.image}
                   alt={workout.title}
@@ -508,6 +704,7 @@ const WorkoutPage = () => {
                     </div>
                   </div>
                   <h3 className="text-xl font-bold mb-2">{workout.title}</h3>
+                  <p className="text-gray-600 mb-4 line-clamp-2">{workout.description}</p>
                   <button 
                     className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors"
                     onClick={() => handleStartWorkout(workout)}
@@ -520,55 +717,17 @@ const WorkoutPage = () => {
           ) : (
             <div className="col-span-3 text-center py-12">
               <h3 className="text-xl font-bold mb-2 text-gray-700">No workouts found</h3>
-              <p className="text-gray-500">Try adjusting your age or selecting a different category</p>
+              <p className="text-gray-500">
+                {selectedCategory === 'Saved Workouts' 
+                  ? 'You haven\'t saved any workouts yet. Save workouts to see them here!'
+                  : 'Try adjusting your age or selecting a different category'}
+              </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Age Input Modal */}
-      {showAgeModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div 
-            ref={ageModalRef} 
-            className="bg-white rounded-lg p-6 max-w-sm w-full"
-          >
-            <h3 className="text-xl font-bold mb-4">Update Your Age</h3>
-            <form onSubmit={handleAgeSubmit}>
-              <div className="mb-4">
-                <label htmlFor="age" className="block text-gray-700 mb-2">Enter your age:</label>
-                <input 
-                  type="number" 
-                  id="age" 
-                  name="age" 
-                  min="1" 
-                  max="120"
-                  defaultValue={userAge}
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button 
-                  type="button"
-                  onClick={() => setShowAgeModal(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Workout Details Modal with Click-Outside Detection */}
+      {/* Workout Details Modal */}
       {showModal && selectedWorkout && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div 
@@ -605,28 +764,35 @@ const WorkoutPage = () => {
                   </div>
                   
                   <h3 className="text-2xl font-bold mb-2">{selectedWorkout.title}</h3>
-                  <p className="text-gray-600 mb-6">{selectedWorkout.description || 'No description available.'}</p>
+                  <p className="text-gray-600 mb-6">{selectedWorkout.description}</p>
                   
                   {/* Age Recommendation Info */}
-                  <div className="bg-blue-50 p-3 rounded-lg mb-6">
-                    <p className="text-blue-800 text-sm">
-                      {selectedWorkout.recommendedAgeRanges && selectedWorkout.recommendedAgeRanges.map((range, index) => (
-                        <span key={index}>
-                          {index > 0 && ' or '}
-                          Recommended for ages {range.min}-{range.max}
-                        </span>
-                      ))}
-                    </p>
-                  </div>
+                  {selectedWorkout.recommendedAgeRanges && (
+                    <div className="bg-blue-50 p-3 rounded-lg mb-6">
+                      <p className="text-blue-800 text-sm">
+                        {selectedWorkout.recommendedAgeRanges.map((range, index) => (
+                          <span key={index}>
+                            {index > 0 && ' or '}
+                            Recommended for ages {range.min}-{range.max}
+                          </span>
+                        ))}
+                      </p>
+                    </div>
+                  )}
                   
                   {/* Action Buttons */}
                   <div className="flex space-x-4 mb-4">
                     <button 
-                      className="flex-1 flex items-center justify-center bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors"
-                      onClick={() => alert('Workout saved!')}
+                      className={`flex-1 flex items-center justify-center ${
+                        isWorkoutSaved(selectedWorkout.id || selectedWorkout.workoutId)
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-gray-100 text-gray-700'
+                      } py-2 rounded-lg hover:bg-gray-200 transition-colors`}
+                      onClick={() => handleSaveWorkout(selectedWorkout)}
+                      disabled={isSaving}
                     >
                       <BookmarkPlus className="w-4 h-4 mr-2" />
-                      Save
+                      {isWorkoutSaved(selectedWorkout.id || selectedWorkout.workoutId) ? 'Saved' : 'Save'}
                     </button>
                     <button 
                       className="flex-1 flex items-center justify-center bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors"
@@ -671,7 +837,7 @@ const WorkoutPage = () => {
                   <X className="w-5 h-5" />
                 </button>
                 
-                {/* YouTube Video */}
+                {/* Video */}
                 <div className="aspect-w-16 aspect-h-9">
                   <iframe 
                     className="w-full h-64"
@@ -687,19 +853,23 @@ const WorkoutPage = () => {
                 <div className="p-6">
                   <h3 className="text-2xl font-bold mb-4">{selectedWorkout.title}</h3>
                   
-                  <div className="mb-4">
-                    <h4 className="text-lg font-semibold mb-2">Instructions</h4>
-                    <ul className="list-disc pl-5 space-y-1">
-                      {selectedWorkout.detailedInstructions && selectedWorkout.detailedInstructions.map((step, index) => (
-                        <li key={index} className="text-gray-700">{step}</li>
-                      ))}
-                    </ul>
-                  </div>
+                  {selectedWorkout.detailedInstructions && (
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold mb-2">Instructions</h4>
+                      <ul className="list-disc pl-5 space-y-1">
+                        {selectedWorkout.detailedInstructions.map((step, index) => (
+                          <li key={index} className="text-gray-700">{step}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   
-                  <div className="mb-4">
-                    <h4 className="text-lg font-semibold mb-2">Benefits</h4>
-                    <p className="text-gray-700">{selectedWorkout.benefits}</p>
-                  </div>
+                  {selectedWorkout.benefits && (
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold mb-2">Benefits</h4>
+                      <p className="text-gray-700">{selectedWorkout.benefits}</p>
+                    </div>
+                  )}
                   
                   <div className="flex space-x-2">
                     <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">{selectedWorkout.category}</span>

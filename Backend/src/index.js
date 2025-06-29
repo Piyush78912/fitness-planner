@@ -9,6 +9,7 @@ import connectDB from "./db/index.js";
 import authRoutes from "./routes/auth.routes.js";
 import bmiRoutes from "./routes/bmi.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
+import savedWorkoutRoutes from './routes/savedWorkout.routes.js';
 import userRoutes from "./routes/user.routes.js";
 import workoutRoutes from "./routes/workout.routes.js";
 
@@ -35,6 +36,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/workouts", workoutRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/bmi", bmiRoutes);
+app.use("/api/saved-workouts", savedWorkoutRoutes);
 
 // Health Check
 app.get("/", (req, res) => {

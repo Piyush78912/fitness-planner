@@ -70,7 +70,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // Check if user exists
+    // Check if user exists and get all fields except password
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(404).json({
@@ -91,14 +91,13 @@ export const login = async (req, res) => {
     // Generate token
     const token = generateToken(user._id);
 
+    // Get user data without password
+    const userData = await User.findById(user._id).select('-password');
+
     res.status(200).json({
       success: true,
       token,
-      user: {
-        id: user._id,
-        fullName: `${user.firstName} ${user.lastName}`,
-        email: user.email
-      }
+      user: userData
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -136,7 +135,7 @@ export const getMe = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: user
+      user
     });
   } catch (err) {
     console.error(err);

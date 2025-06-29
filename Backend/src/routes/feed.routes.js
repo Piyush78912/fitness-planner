@@ -1,11 +1,11 @@
 import express from 'express';
 import {
-  getFeedItems,
-  createPost,
-  updatePost,
-  deletePost,
-  likePost,
-  commentOnPost
+    commentOnPost,
+    createPost,
+    deletePost,
+    getFeedItems,
+    likePost,
+    updatePost
 } from '../controllers/feed.controller.js';
 import { authenticateUser } from '../middleware/authMiddleware.js';
 

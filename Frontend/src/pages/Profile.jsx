@@ -8,9 +8,9 @@ function Profile() {
   const [userData, setUserData] = useState({
     name: '',
     email: '',
-    memberSince: 'January 2023',
+    memberSince: '',
     profileImage: sample,
-    fitnessGoals: 'Build muscle and improve overall fitness',
+    fitnessGoals: '',
     height: '',
     weight: '',
     age: '',
@@ -57,54 +57,15 @@ function Profile() {
 
   // Fetch user data on component mount
   useEffect(() => {
-    // First check and log localStorage content
-    const rawUserData = checkLocalStorage();
-    
-    // Try to get from localStorage
-    if (rawUserData) {
-      try {
-        const parsedData = JSON.parse(rawUserData);
-        console.log('Parsed user data:', parsedData);
-        
-        // Get user's name for display - Check all possible name fields
-        const displayName = parsedData.fullName || 
-          (parsedData.firstName && parsedData.lastName ? 
-            `${parsedData.firstName} ${parsedData.lastName}` : 
-            parsedData.firstName || parsedData.username || parsedData.email || '');
-        
-        console.log('Display name from localStorage:', displayName);
-        
-        if (displayName || parsedData.email) {
-          setUserData(prevData => ({
-            ...prevData,
-            name: displayName || prevData.name,
-            email: parsedData.email || prevData.email,
-          }));
-          
-          setFormData(prevData => ({
-            ...prevData,
-            name: displayName || prevData.name,
-            email: parsedData.email || prevData.email,
-          }));
-        }
-      } catch (err) {
-        console.error('Error parsing user data from localStorage:', err);
-      }
-    }
-
-    // Then try to fetch fresh data from API
     const fetchUserProfile = async () => {
       try {
         const token = localStorage.getItem('token');
-        console.log('Auth token:', token ? 'Token exists' : 'No token');
-        
         if (!token) {
-          console.warn('No authentication token found, skipping API call');
-          setIsLoading(false);
-          return;
+          throw new Error('No authentication token found');
         }
 
-        console.log('Fetching profile from API...');
+        console.log('Fetching profile data...'); // Debug log
+
         const response = await fetch('http://localhost:8000/api/users/profile', {
           method: 'GET',
           headers: {
@@ -114,74 +75,39 @@ function Profile() {
         });
 
         if (!response.ok) {
-          console.error('API response not OK:', response.status, response.statusText);
-          throw new Error(`Failed to fetch user profile: ${response.status}`);
+          throw new Error(`Failed to fetch profile: ${response.status}`);
         }
 
-        const responseData = await response.json();
-        console.log('API response data:', responseData);
-        
-        // Check response structure and extract user data
-        let userData;
-        if (responseData && responseData.success === true && responseData.data) {
-          userData = responseData.data;
-          console.log('Extracted user data from response:', userData);
-        } else {
-          userData = responseData;
-        }
-        
-        // Set a fallback name if none is provided
-        let apiDisplayName = 'User';
-        
-        // Only try to extract name if userData exists and is an object
-        if (userData && typeof userData === 'object') {
-          // Try to extract name from various possible fields
-          apiDisplayName = userData.fullName || 
-            (userData.firstName && userData.lastName ? 
-              `${userData.firstName} ${userData.lastName}` : 
-              userData.firstName || userData.username || userData.name || userData.email || 'User');
-        }
-        
-        console.log('Display name from API:', apiDisplayName);
-        
-        // Update state with fetched data, with careful null/undefined checks
-        setUserData(prevData => ({
-          ...prevData,
-          name: apiDisplayName !== 'User' ? apiDisplayName : prevData.name || 'User',
-          email: userData && userData.email ? userData.email : prevData.email,
-          height: userData && userData.height ? userData.height : prevData.height,
-          weight: userData && userData.weight ? userData.weight : prevData.weight,
-          age: userData && userData.age ? userData.age : prevData.age,
-          fitnessGoals: userData && userData.fitnessGoals ? userData.fitnessGoals : prevData.fitnessGoals,
-          profileImage: userData && userData.profileImage ? userData.profileImage : prevData.profileImage,
-        }));
-        
-        setFormData(prevData => ({
-          ...prevData,
-          name: apiDisplayName !== 'User' ? apiDisplayName : prevData.name || 'User',
-          email: userData && userData.email ? userData.email : prevData.email,
-          height: userData && userData.height ? userData.height : prevData.height,
-          weight: userData && userData.weight ? userData.weight : prevData.weight,
-          age: userData && userData.age ? userData.age : prevData.age,
-          fitnessGoals: userData && userData.fitnessGoals ? userData.fitnessGoals : prevData.fitnessGoals,
-        }));
-        
-        // Update localStorage with fresh data if needed
-        if (apiDisplayName !== 'User' || (userData && userData.email)) {
-          try {
-            const currentUserData = JSON.parse(localStorage.getItem('userData') || '{}');
-            localStorage.setItem('userData', JSON.stringify({
-              ...currentUserData,
-              fullName: apiDisplayName !== 'User' ? apiDisplayName : currentUserData.fullName,
-              email: userData && userData.email ? userData.email : currentUserData.email
-            }));
-          } catch (err) {
-            console.error('Error updating localStorage:', err);
-          }
+        const { success, data } = await response.json();
+        console.log('Profile data received:', data);
+
+        if (data) {
+          const updatedData = {
+            ...userData,
+            name: data.name || '',
+            email: data.email || '',
+            age: data.age || '',
+            height: data.height || '',
+            weight: data.weight || '',
+            fitnessGoals: data.fitnessGoals || '',
+            profileImage: data.profileImage || sample,
+            memberSince: data.memberSince ? new Date(data.memberSince).toLocaleDateString('en-US', {
+              month: 'long',
+              year: 'numeric'
+            }) : ''
+          };
+
+          console.log('Updating state with:', updatedData); // Debug log
+
+          setUserData(updatedData);
+          setFormData(updatedData);
+
+          // Update localStorage
+          localStorage.setItem('userData', JSON.stringify(data));
         }
       } catch (err) {
-        console.error('Error fetching user profile:', err);
-        setError('Failed to load user profile data. Please try again later.');
+        console.error('Error fetching profile:', err);
+        setError(err.message);
       } finally {
         setIsLoading(false);
       }
@@ -193,21 +119,24 @@ function Profile() {
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [name]: value
-    });
+    }));
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('No authentication token found');
       }
+
+      console.log('Submitting profile update with data:', formData);
 
       const response = await fetch('http://localhost:8000/api/users/profile', {
         method: 'PUT',
@@ -217,38 +146,50 @@ function Profile() {
         },
         body: JSON.stringify({
           name: formData.name,
-          age: formData.age,
-          height: formData.height,
-          weight: formData.weight,
+          age: formData.age ? parseInt(formData.age) : undefined,
+          height: formData.height ? parseInt(formData.height) : undefined,
+          weight: formData.weight ? parseInt(formData.weight) : undefined,
           fitnessGoals: formData.fitnessGoals
         })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update profile');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
       }
 
-      const data = await response.json();
-      
-      // Update local state with the form data
-      setUserData({...formData});
-      
-      // Update localStorage with the new data
-      try {
-        const currentUserData = JSON.parse(localStorage.getItem('userData') || '{}');
-        localStorage.setItem('userData', JSON.stringify({
-          ...currentUserData,
-          fullName: formData.name,
-          email: formData.email
-        }));
-      } catch (err) {
-        console.error('Error updating localStorage after submit:', err);
+      const { data } = await response.json();
+      console.log('Profile update response:', data);
+
+      if (data) {
+        // Update both userData and formData with the response
+        const updatedData = {
+          ...userData,
+          name: data.name || userData.name,
+          email: data.email || userData.email,
+          age: data.age || '',
+          height: data.height || '',
+          weight: data.weight || '',
+          fitnessGoals: data.fitnessGoals || userData.fitnessGoals,
+          profileImage: data.profileImage || userData.profileImage
+        };
+
+        console.log('Updating state after profile update:', updatedData); // Debug log
+
+        setUserData(updatedData);
+        setFormData(updatedData);
+        
+        // Update localStorage with new user data
+        localStorage.setItem('userData', JSON.stringify(data));
+        
+        setEditMode(false);
+        alert('Profile updated successfully!');
       }
-      
-      setEditMode(false);
     } catch (err) {
       console.error('Error updating profile:', err);
-      alert('Failed to update profile. Please try again.');
+      alert(err.message || 'Failed to update profile. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -307,7 +248,7 @@ function Profile() {
             {/* Profile Header with Image */}
             <div className="px-4 py-5 sm:px-6 bg-gray-50 flex items-center space-x-4">
               <img 
-                src={userData.profileImage} 
+                src={sample} 
                 alt="Profile" 
                 className="h-24 w-24 rounded-full object-cover border-4 border-red-500"
               />
@@ -355,6 +296,8 @@ function Profile() {
                       id="age"
                       value={formData.age}
                       onChange={handleInputChange}
+                      min="0"
+                      max="120"
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 p-2 border"
                     />
                   </div>
@@ -429,12 +372,14 @@ function Profile() {
                       {userData.email || 'Not specified'}
                     </dd>
                   </div>
-                  <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt className="text-sm font-medium text-gray-500 flex items-center">
                       <Calendar className="h-5 w-5 mr-2 text-gray-400" />
                       Age
                     </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{userData.age ? `${userData.age} years` : 'Not specified'}</dd>
+                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                      {userData.age ? `${userData.age} years` : 'Not specified'}
+                    </dd>
                   </div>
                   <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt className="text-sm font-medium text-gray-500 flex items-center">

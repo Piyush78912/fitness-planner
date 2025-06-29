@@ -2,32 +2,27 @@ import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
-  firstName: {
+  name: {
     type: String,
-    required: [true, 'Please provide first name'],
-    trim: true
-  },
-  lastName: {
-    type: String,
-    required: [true, 'Please provide last name'],
+    required: true,
     trim: true
   },
   email: {
     type: String,
-    required: [true, 'Please provide email'],
+    required: true,
     unique: true,
     trim: true,
-    lowercase: true,
-    match: [
-      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-      'Please provide a valid email'
-    ]
+    lowercase: true
   },
   password: {
     type: String,
-    required: [true, 'Please provide password'],
-    minlength: 6,
-    select: false
+    required: true
+  },
+  // Profile information
+  age: {
+    type: Number,
+    min: 0,
+    max: 120
   },
   height: {
     type: Number,
@@ -37,23 +32,24 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     min: 0
   },
-  bmi: {
-    type: Number,
-    min: 0
+  fitnessGoals: {
+    type: String
   },
-  bmiCategory: {
+  profileImage: {
     type: String,
-    enum: ['Underweight', 'Normal weight', 'Overweight', 'Obesity']
+    default: 'https://i.pravatar.cc/150?img=5'
   },
-  createdAt: {
+  memberSince: {
     type: Date,
     default: Date.now
   }
+}, {
+  timestamps: true
 });
 
 // Virtual for full name
 UserSchema.virtual('fullName').get(function() {
-  return `${this.firstName} ${this.lastName}`;
+  return `${this.name}`;
 });
 
 // Method to calculate BMI
@@ -78,20 +74,15 @@ UserSchema.methods.calculateBMI = function () {
 
 // Hash password before saving
 UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 8);
   }
+  next();
 });
 
-// Method to compare passwords
+// Method to compare password for login
 UserSchema.methods.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema);

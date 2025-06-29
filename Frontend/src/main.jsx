@@ -1,34 +1,36 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { StrictMode } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Header from './Header/Header';
-import Footer from './Footer/Footer';
-import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import React, { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Footer from './Footer/Footer';
+import Header from './Header/Header';
+import './index.css';
 
 // Pages
-import WorkoutPage from './pages/WorkoutPage';
+import Events from './pages/community/Events';
+import FindPartnerPage from './pages/community/FindPartner';
+import Forums from './pages/community/Forums';
+import SuccessStories from './pages/community/SuccessStories';
 import FeedPage from './pages/FeedPage';
-import MessagesPage from './pages/MessagePage';
 import HandbookPage from './pages/HandbookPage';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Settings from './pages/Settings';
-import Profile from './pages/Profile';
-import WorkoutPlans from './pages/workout/WorkoutPlans'; // Import the WorkoutPlans component
 import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import TermsOfService from './pages/legal/TermsOfService';
-import NutritionGuide from './pages/workout/NutritionGuide';
-import MeditationSessions from './pages/workout/MeditationSessions';
-import ProgressTracker from './pages/workout/ProgressTracker';
-import Events from './pages/community/Events';
-import SuccessStories from './pages/community/SuccessStories';
-import Forums from './pages/community/Forums';
-import FindPartnerPage from './pages/community/FindPartner';
-import HelpCenter from './pages/support/HelpCenter';
+import Login from './pages/Login';
+import MessagesPage from './pages/MessagePage';
+import Profile from './pages/Profile';
+import SavedWorkoutsPage from './pages/SavedWorkoutsPage';
+import Settings from './pages/Settings';
+import Signup from './pages/Signup';
 import ContactUs from './pages/support/Contact';
+import HelpCenter from './pages/support/HelpCenter';
+import MeditationSessions from './pages/workout/MeditationSessions';
+import NutritionGuide from './pages/workout/NutritionGuide';
+import ProgressTracker from './pages/workout/ProgressTracker';
+import WorkoutPlans from './pages/workout/WorkoutPlans'; // Import the WorkoutPlans component
+import WorkoutPage from './pages/WorkoutPage';
 
 // Simple auth check function
 const isAuthenticated = () => {
@@ -57,6 +59,7 @@ const AuthenticatedLayout = ({ children }) => {
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Router>
+      <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         {/* Public routes - no header, no auth required */}
         <Route path="/login" element={<Login />} />
@@ -267,6 +270,17 @@ createRoot(document.getElementById('root')).render(
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/saved-workouts"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <SavedWorkoutsPage />
+              </AuthenticatedLayout>
             </ProtectedRoute>
           }
         />

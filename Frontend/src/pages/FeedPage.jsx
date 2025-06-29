@@ -1,22 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Heart,
-  MessageCircle,
-  Share2,
-  MoreVertical,
-  Image as ImageIcon,
-  Smile,
-  Send,
-  X,
+import {
   Copy,
-  Mail,
-  Link as LinkIcon,
-  MessageSquare,
   Facebook,
-  Twitter,
+  Heart,
+  Image as ImageIcon,
   Instagram,
-  User
+  Mail,
+  MessageCircle,
+  MessageSquare,
+  MoreVertical,
+  Send,
+  Share2,
+  Smile,
+  Twitter,
+  User,
+  X
 } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 
 function FeedPage() {
   const [newPost, setNewPost] = useState('');

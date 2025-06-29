@@ -1,5 +1,5 @@
-import { Bell, Calculator } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { Calculator } from 'lucide-react';
+import React, { useState } from 'react';
 import sample from "../assets/sample.png";
 import BMICalculatorModal from '../components/BMICalculatorModal';
 import NavigationLinks from '../components/NavigationLinks';
@@ -7,24 +7,6 @@ import ProfileDropdown from '../components/ProfileDropdown';
 
 function Header() {
   const [isBMIModalOpen, setIsBMIModalOpen] = useState(false);
-  const [userData, setUserData] = useState(null);
-  const [profileImage, setProfileImage] = useState(sample);
-
-  useEffect(() => {
-    // Get user data from localStorage
-    const storedUserData = localStorage.getItem('userData');
-    if (storedUserData) {
-      try {
-        const parsedData = JSON.parse(storedUserData);
-        setUserData(parsedData);
-        if (parsedData.profileImage) {
-          setProfileImage(parsedData.profileImage);
-        }
-      } catch (err) {
-        console.error('Error parsing user data from localStorage:', err);
-      }
-    }
-  }, []);
 
   return (
     <nav className="bg-red-500/90 sticky top-0 w-full z-50">
@@ -69,7 +51,7 @@ function Header() {
             </button>
 
             {/* Profile Dropdown */}
-            <ProfileDropdown profileImage={profileImage} />
+            <ProfileDropdown profileImage={sample} />
           </div>
         </div>
       </div>

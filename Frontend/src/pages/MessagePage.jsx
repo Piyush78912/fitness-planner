@@ -145,8 +145,7 @@ function MessagesPage() {
         sender: 'You',
         content: 'Perfect timing! I was just looking for some flexibility work',
         timestamp: '2:05 PM',
-        isSender: true
-      },
+        isSender: true      },
       {
         id: 3,
         sender: 'Emma Rodriguez',
